@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@react-three/cannon": "^6.4.0",
+    "@react-three/drei": "^9.34.3",
+    "@react-three/fiber": "^8.8.9"
+  }
+}
