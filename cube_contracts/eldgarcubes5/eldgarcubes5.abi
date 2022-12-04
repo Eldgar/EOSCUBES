@@ -1,0 +1,156 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "addcube",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "pos",
+                    "type": "int32[]"
+                },
+                {
+                    "name": "texture",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "balances",
+            "base": "",
+            "fields": [
+                {
+                    "name": "user",
+                    "type": "uint64"
+                },
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "cube",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "pos",
+                    "type": "int32[]"
+                },
+                {
+                    "name": "texture",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "cubeprice",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "x",
+                    "type": "int32"
+                },
+                {
+                    "name": "y",
+                    "type": "int32"
+                },
+                {
+                    "name": "z",
+                    "type": "int32"
+                },
+                {
+                    "name": "price",
+                    "type": "uint32"
+                },
+                {
+                    "name": "pos",
+                    "type": "int32[]"
+                }
+            ]
+        },
+        {
+            "name": "removecube",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint16"
+                },
+                {
+                    "name": "username",
+                    "type": "name"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "addcube",
+            "type": "addcube",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "removecube",
+            "type": "removecube",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "balances",
+            "type": "balances",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "cubeprices",
+            "type": "cubeprice",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "cubes",
+            "type": "cube",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}
