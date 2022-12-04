@@ -74,9 +74,11 @@ public:
 
     void fee(name owner, eosio::asset quantity);
 
-    void set_price(std::vector<int32_t> &pos);
+    uint16_t create_price(std::vector<int32_t>  pos);
 
-    auto get_price(std::vector<int32_t> pos);
+    void set_prices(std::vector<int32_t> pos);
+
+    auto get_prices(std::vector<int32_t> pos);
 
     [[eosio::action]]
     void addcube(const name username, const std::string &key, const std::vector<int32_t> &pos, const std::string &texture);
@@ -86,10 +88,7 @@ public:
 
 protected:
     
-    uint16_t set_price_impl(
-                            const    std::vector<int32_t> &pos
-                            );
-
+    
     uint16_t addcube_impl(
                         const name                    username, 
                         const std::string &           key,

@@ -17,11 +17,8 @@ void eldgarcubes5::wegotpaid(name from, name to, eosio::asset quantity, std::str
 		const uint8_t waxdecimals = 4;
 
 		const symbol waxsymbol(
-
 			waxString,
-
 			waxdecimals
-
 		);
 
 		const std::string_view waxdaoString{"EOS"};
@@ -118,11 +115,8 @@ void eldgarcubes5::fee(name owner, asset amount){
 		const uint8_t waxdecimals = 4;
 
 		const symbol waxsymbol(
-
 			waxString,
-
 			waxdecimals
-
 		);
 
     bal_table bals( get_self(), get_self().value );
@@ -142,24 +136,11 @@ void eldgarcubes5::fee(name owner, asset amount){
 
 			check(false, "No Balance.");
 		}
-
-  /*bal_table accounts(get_self(), owner.value);
-  auto acct = accounts.find(waxsymbol.code().raw());
-
-  //emplace account if not found, update if exists
-  if (acct == accounts.end()) { //no account
-      check(false, "No Balance.");
-  } else { //exists
-    check(amount <= acct->balance, "Exceeding User Balance");
-    accounts.modify(*acct, _self, [&](auto& col) {
-      col.balance -= amount;
-    });
-  }*/
 }
 
 
 //get price of block location default 0.01 EOS
-auto eldgarcubes5::get_price(std::vector<int32_t>  pos) {
+auto eldgarcubes5::get_prices(std::vector<int32_t>  pos) {
     cubeprices find_price( get_self(), contract_account.value );
         int32_t x = pos[0];
         int32_t y = pos[1];
@@ -181,13 +162,22 @@ auto eldgarcubes5::get_price(std::vector<int32_t>  pos) {
 };
 
 
-void eldgarcubes5::set_price(std::vector<int32_t> & pos)
+uint16_t eldgarcubes5::create_price(std::vector<int32_t> pos){
+        cubeprices set_price(get_self(), contract_account.value );
+    
+        int32_t x = pos[0];
+        int32_t y = pos[1];
+        int32_t z = pos[2];
+        uint32_t price = 10;
+        uint16_t id=set_price.available_primary_key();
+      
+        cubeprice new_price{id, x, y ,z, price, pos};
+        set_price.emplace(contract_account, [&](auto &row) { row = new_price; });
+        return id;
+}
+
+void eldgarcubes5::set_prices(std::vector<int32_t> pos)
 {
-    set_price_impl(pos);
-} 
-uint16_t eldgarcubes5::set_price_impl(
-                            const    std::vector<int32_t> &pos
-) {
     cubeprices set_price(get_self(), contract_account.value );
     
         int32_t x = pos[0];
@@ -203,14 +193,10 @@ uint16_t eldgarcubes5::set_price_impl(
             });
 
 		} else {
-            uint32_t price = 10;
-            uint16_t id=set_price.available_primary_key();
-      
-            cubeprice new_price{id, x, y ,z, price, pos};
-            set_price.emplace(contract_account, [&](auto &row) { row = new_price; });
-            return id;
+            create_price(pos);
 		}
 };
+
 
 uint16_t eldgarcubes5::addcube_impl( 
                                 const name                      username,
@@ -225,17 +211,15 @@ uint16_t eldgarcubes5::addcube_impl(
 		const uint8_t waxdecimals = 4;
 
 		const symbol waxsymbol(
-
 			waxString,
-
 			waxdecimals
 
 		);
-      set_price_impl(pos);
-      asset quantity = asset(10, waxsymbol);
+      set_prices(pos);
+      asset quantity = asset(get_prices(pos), waxsymbol);
       fee(username, quantity);
       cubes existing_cubes(get_self(), contract_account.value); 
-      // proceed with order creation
+      // proceed with cube creation
       uint16_t id=existing_cubes.available_primary_key();
       cube new_cube{id, username, key, pos, texture};
       existing_cubes.emplace(contract_account, [&](auto &row) { row = new_cube; });
