@@ -75,27 +75,11 @@
             "fields": [
                 {
                     "name": "id",
-                    "type": "uint16"
-                },
-                {
-                    "name": "x",
-                    "type": "int32"
-                },
-                {
-                    "name": "y",
-                    "type": "int32"
-                },
-                {
-                    "name": "z",
-                    "type": "int32"
+                    "type": "uint64"
                 },
                 {
                     "name": "price",
                     "type": "uint32"
-                },
-                {
-                    "name": "pos",
-                    "type": "int32[]"
                 }
             ]
         },

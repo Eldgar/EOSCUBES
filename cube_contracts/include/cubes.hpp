@@ -17,13 +17,13 @@ using namespace eosio;
 namespace tte {
 
 // IMPORTANT: Must be the same as the --filter-name parameter's value of rodeos
-static constexpr auto contract_account = "eldgarcubes5"_n;
+static constexpr auto contract_account = "eldgarcube11"_n;
 
-class[[eosio::contract("eldgarcubes5")]] eldgarcubes5 : public contract
+class[[eosio::contract("eldgarcube11")]] eldgarcube11 : public contract
 {
 public:
     using contract::contract;
-    eldgarcubes5(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds) {}
+    eldgarcube11(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds) {}
 
     
 
@@ -45,12 +45,8 @@ public:
     // cubes price for specified position value
     struct [[eosio::table]] cubeprice
     {
-        uint16_t               id = 0;
-        int32_t                x;
-        int32_t                y;
-        int32_t                z;
+        uint64_t               id = 0;
         uint32_t                price;
-        std::vector<int32_t>    pos;
         
         uint16_t primary_key() const { return id; }
         //EOSLIB_SERIALIZE( cube, (id)(username)(key)(pos)(texture))
@@ -74,9 +70,11 @@ public:
 
     void fee(name owner, eosio::asset quantity);
 
-    uint16_t create_price(std::vector<int32_t>  pos);
+    uint64_t create_price(std::vector<int32_t>  pos);
 
     void set_prices(std::vector<int32_t> pos);
+
+    uint64_t pos_conversion(std::vector<int32_t> pos);
 
     auto get_prices(std::vector<int32_t> pos);
 
@@ -97,6 +95,6 @@ protected:
                         bool                          invoke_return_value);
 };
 
-//EOSIO_DISPATCH(eldgarcubes4,(wegotpaid)(addcube)(removecube))
+//EOSIO_DISPATCH(eldgarcube11,(wegotpaid)(addcube)(removecube))
 
 } // namespace tte

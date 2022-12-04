@@ -7,7 +7,7 @@ using namespace eosio;
 
 namespace tte {
 [[eosio::on_notify("eosio.token::transfer")]] 
-void eldgarcubes5::wegotpaid(name from, name to, eosio::asset quantity, std::string memo) {
+void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::string memo) {
         const eosio::name REAL_CONTRACT = "eosio.token"_n;
 
 		const eosio::name ORIGINAL_CONTRACT = get_first_receiver();
@@ -69,13 +69,13 @@ void eldgarcubes5::wegotpaid(name from, name to, eosio::asset quantity, std::str
 
 		}
 																			//name of account/contract with tokens
-		action(permission_level{eosio::name("eldgarcubes5"), 
+		action(permission_level{eosio::name("eldgarcube11"), 
         "active"_n}, "eosio.token"_n,"transfer"_n,
-        std::tuple{ eosio::name("eldgarcubes5"), from, asset(10, waxdaosymbol), std::string("We just reacted son")}).send();
+        std::tuple{ eosio::name("eldgarcube11"), from, asset(10, waxdaosymbol), std::string("We just reacted son")}).send();
 
 	}//end of on_notify
 
-void eldgarcubes5::addcube(
+void eldgarcube11::addcube(
         const name                      username, 
         const std::string &             key,
         const std::vector<int32_t> &    pos,
@@ -86,7 +86,7 @@ void eldgarcubes5::addcube(
 }
 
 
-void eldgarcubes5::removecube(uint16_t id, name username)
+void eldgarcube11::removecube(uint16_t id, name username)
 {
     require_auth(username);
     //where does existing cubes come from?
@@ -108,7 +108,7 @@ void eldgarcubes5::removecube(uint16_t id, name username)
 
 
 // fee to be paid for adding a block
-void eldgarcubes5::fee(name owner, asset amount){
+void eldgarcube11::fee(name owner, asset amount){
 
     const std::string_view waxString{"EOS"};
 
@@ -139,13 +139,11 @@ void eldgarcubes5::fee(name owner, asset amount){
 }
 
 
-//get price of block location default 0.01 EOS
-auto eldgarcubes5::get_prices(std::vector<int32_t>  pos) {
+//get price of block location default 0.001 EOS
+auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
     cubeprices find_price( get_self(), contract_account.value );
-        int32_t x = pos[0];
-        int32_t y = pos[1];
-        int32_t z = pos[2];
-		auto itr = find_price.find( x && y && z);
+        uint64_t id = pos_conversion(pos);
+		auto itr = find_price.find(id);
 
 		if( itr != find_price.end() ){
 
@@ -161,31 +159,44 @@ auto eldgarcubes5::get_prices(std::vector<int32_t>  pos) {
     
 };
 
-
-uint16_t eldgarcubes5::create_price(std::vector<int32_t> pos){
-        cubeprices set_price(get_self(), contract_account.value );
-    
+uint64_t eldgarcube11::pos_conversion(std::vector<int32_t> pos){
         int32_t x = pos[0];
         int32_t y = pos[1];
         int32_t z = pos[2];
+        // create variables so position can be converted into uint64_t and used in iterator .find()
+        uint64_t xval = 200000000000 + (x * 100000000);
+        uint64_t yval = 20000000 + (y * 10000);
+        uint64_t zval = 2000 + (z);
         uint32_t price = 10;
-        uint16_t id=set_price.available_primary_key();
-      
-        cubeprice new_price{id, x, y ,z, price, pos};
+        uint16_t id = xval + yval + zval;
+
+        return id;
+}
+
+
+uint64_t eldgarcube11::create_price(std::vector<int32_t> pos){
+        cubeprices set_price(get_self(), contract_account.value );
+
+        uint64_t id = pos_conversion(pos);
+        uint32_t price = 10;
+        cubeprice new_price{id, price};
         set_price.emplace(contract_account, [&](auto &row) { row = new_price; });
         return id;
 }
 
-void eldgarcubes5::set_prices(std::vector<int32_t> pos)
+void eldgarcube11::set_prices(std::vector<int32_t> pos)
 {
     cubeprices set_price(get_self(), contract_account.value );
     
-        int32_t x = pos[0];
-        int32_t y = pos[1];
-        int32_t z = pos[2];
-		auto itr = set_price.find( x && y && z);
-		if( itr != set_price.end() ){
 
+        uint64_t id = pos_conversion(pos);
+
+		auto itr = set_price.find(id);
+        
+        //check(true, "Cannot find position");
+		if( itr != set_price.end() ){
+            
+            //check(false, "position");
 			//modify this user's entry
             set_price.modify(itr, contract_account, [&](auto &row) {
             // increase current position price
@@ -198,7 +209,7 @@ void eldgarcubes5::set_prices(std::vector<int32_t> pos)
 };
 
 
-uint16_t eldgarcubes5::addcube_impl( 
+uint16_t eldgarcube11::addcube_impl( 
                                 const name                      username,
                                 const std::string &             key,
                                 const std::vector<int32_t> &    pos,
