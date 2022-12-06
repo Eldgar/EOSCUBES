@@ -216,6 +216,13 @@ uint16_t eldgarcube11::addcube_impl(
                                 const std::string &             texture,
                                 bool                            invoke_return_value)
    {
+        check(
+            (texture == "dirt") ||
+            (texture == "grass") ||
+            (texture == "glass") ||
+            (texture == "wood") ||
+            (texture == "log") ||
+            (texture == "saphire"), "Not a valid texutre");
       require_auth(username);
       const std::string_view waxString{"EOS"};
 
