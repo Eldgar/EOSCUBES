@@ -86,14 +86,28 @@ void eldgarcube11::addcube(
 }
 
 
+
 void eldgarcube11::removecube(uint16_t id, name username)
 {
+    const std::string_view waxString{"EOS"};
+
+		const uint8_t waxdecimals = 4;
+
+		const symbol waxsymbol(
+			waxString,
+			waxdecimals
+
+		);
     require_auth(username);
     //where does existing cubes come from?
     cubes existing_cubes(get_self(), contract_account.value);
 
     // Check if cube exists
     auto itr = existing_cubes.find(id);
+    auto pos = itr->pos;
+    auto cube_owner = itr->username;
+    asset quantity = asset(get_prices(pos), waxsymbol);
+    fee(username, quantity);
     check(itr != existing_cubes.end(), "Unable to find an order with specified ID");
 
     // proceed with order modification
