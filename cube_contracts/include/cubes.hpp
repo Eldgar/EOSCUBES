@@ -68,7 +68,7 @@ public:
     [[eosio::on_notify("eosio.token::transfer")]] 
 	void wegotpaid(name from, name to, eosio::asset quantity, std::string memo);
 
-    void fee(name owner, eosio::asset quantity);
+    void fee(name owner, name reciever, eosio::asset quantity);
 
     uint64_t create_price(std::vector<int32_t>  pos);
 

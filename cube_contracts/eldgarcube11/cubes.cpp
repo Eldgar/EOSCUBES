@@ -9,42 +9,34 @@ namespace tte {
 [[eosio::on_notify("eosio.token::transfer")]] 
 void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::string memo) {
         const eosio::name REAL_CONTRACT = "eosio.token"_n;
-
 		const eosio::name ORIGINAL_CONTRACT = get_first_receiver();
-
 		const std::string_view waxString{"EOS"};
-
 		const uint8_t waxdecimals = 4;
-
 		const symbol waxsymbol(
 			waxString,
 			waxdecimals
 		);
 
 		const std::string_view waxdaoString{"EOS"};
-
 		const uint8_t waxdaodecimals = 4;
-
 		const symbol waxdaosymbol(
 
 			waxdaoString,
-
 			waxdaodecimals
 
 		);
 
 		check( quantity.amount >= 10, "Quanity must be greater than 0.1 EOS" );
-
 		check( REAL_CONTRACT == ORIGINAL_CONTRACT, "You tryna get over on us, bro?" );
 
-		if( from == get_self() || to != get_self() ){ return; }
+		if( from == get_self() || to != get_self() )
+        { return; }
+
 
 		check( quantity.symbol == waxsymbol, "Symbol is not what we were expecting" );
 
 		//emplace info into table
-
 		bal_table bals( get_self(), get_self().value );
-
 		auto itr = bals.find( from.value );
 
 		if( itr != bals.end() ){
@@ -52,9 +44,7 @@ void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::str
 			//modify this user's entry
 
 			bals.modify( itr, same_payer, [&](auto &row) {
-
 				row.balance += quantity;
-
 			});
 
 		} else {
@@ -107,7 +97,7 @@ void eldgarcube11::removecube(uint16_t id, name username)
     auto pos = itr->pos;
     auto cube_owner = itr->username;
     asset quantity = asset(get_prices(pos), waxsymbol);
-    fee(username, quantity);
+    fee(username, cube_owner, quantity);
     check(itr != existing_cubes.end(), "Unable to find an order with specified ID");
 
     // proceed with order modification
@@ -122,21 +112,18 @@ void eldgarcube11::removecube(uint16_t id, name username)
 
 
 // fee to be paid for adding a block
-void eldgarcube11::fee(name owner, asset amount){
+void eldgarcube11::fee(name owner, name reciever, asset amount){
 
     const std::string_view waxString{"EOS"};
-
 		const uint8_t waxdecimals = 4;
-
 		const symbol waxsymbol(
 			waxString,
 			waxdecimals
 		);
-
+    //get balances table
     bal_table bals( get_self(), get_self().value );
-
 		auto itr = bals.find( owner.value );
-
+        auto itrx = bals.find(reciever.value);
 		if( itr != bals.end() ){
 
 			//modify this user's entry
@@ -150,10 +137,28 @@ void eldgarcube11::fee(name owner, asset amount){
 
 			check(false, "No Balance.");
 		}
-}
+        if( itrx != bals.end() ){
+
+			//modify reciever's balance
+			bals.modify( itr, same_payer, [&](auto &row) {
+                check(amount <= row.balance, "Exceeding User Balance");
+				row.balance += amount;
+
+			});
+
+		} else {
+
+			bals.emplace( get_self(), [&](auto &row) {
+
+				row.user = reciever.value;
+                row.username = reciever;
+				row.balance = amount;
+            }
+		}
+};
 
 
-//get price of block location default 0.001 EOS
+//get price of block location
 auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
     cubeprices find_price( get_self(), contract_account.value );
         uint64_t id = pos_conversion(pos);
@@ -201,17 +206,12 @@ uint64_t eldgarcube11::create_price(std::vector<int32_t> pos){
 void eldgarcube11::set_prices(std::vector<int32_t> pos)
 {
     cubeprices set_price(get_self(), contract_account.value );
-    
-
         uint64_t id = pos_conversion(pos);
-
 		auto itr = set_price.find(id);
         
-        //check(true, "Cannot find position");
 		if( itr != set_price.end() ){
             
-            //check(false, "position");
-			//modify this user's entry
+			//modify the price for cube co-ordinates
             set_price.modify(itr, contract_account, [&](auto &row) {
             // increase current position price
             row.price = row.price * 2;
@@ -238,6 +238,7 @@ uint16_t eldgarcube11::addcube_impl(
             (texture == "log") ||
             (texture == "saphire"), "Not a valid texutre");
       require_auth(username);
+      name reciever = contract_account;
       const std::string_view waxString{"EOS"};
 
 		const uint8_t waxdecimals = 4;
@@ -249,7 +250,7 @@ uint16_t eldgarcube11::addcube_impl(
 		);
       set_prices(pos);
       asset quantity = asset(get_prices(pos), waxsymbol);
-      fee(username, quantity);
+      fee(username, reciever, quantity);
       cubes existing_cubes(get_self(), contract_account.value); 
       // proceed with cube creation
       uint16_t id=existing_cubes.available_primary_key();
