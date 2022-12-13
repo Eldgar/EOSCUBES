@@ -75,7 +75,25 @@ void eldgarcube11::addcube(
     addcube_impl(username, key, pos, texture, false);
 }
 
+//get price of block location
+auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
+    cubeprices find_price( get_self(), contract_account.value );
+        uint64_t id = pos_conversion(pos);
+		auto itr = find_price.find(id);
 
+		if( itr != find_price.end() ){
+
+			//return the price for this cube postion
+            return itr->price;
+			
+
+		} else {
+            //cube_prices new_price{x, y ,z, price, pos};
+            //price.emplace(contract_account, [&](auto &g) { g = new_price; });
+			check(false, "price for position doesn't exist");
+		}
+    check(false, "this shouldn't happen");
+};
 
 void eldgarcube11::removecube(uint16_t id, name username)
 {
@@ -100,20 +118,14 @@ void eldgarcube11::removecube(uint16_t id, name username)
     fee(username, cube_owner, quantity);
     check(itr != existing_cubes.end(), "Unable to find an order with specified ID");
 
-    // proceed with order modification
-   //existing_cubes.modify(itr, contract_account, [&](auto &g) {
-    //     g.id = id;
-    //     g.key=key;
-    //     g.pos=pos;
-    //     g.texture=texture;
-   // });
+    //erase cube
     existing_cubes.erase( itr );
 }
 
 
 // fee to be paid for adding a block
-void eldgarcube11::fee(name owner, name reciever, asset amount){
-
+void eldgarcube11::fee(name owner, name reciever, eosio::asset amount){
+    
     const std::string_view waxString{"EOS"};
 		const uint8_t waxdecimals = 4;
 		const symbol waxsymbol(
@@ -124,24 +136,19 @@ void eldgarcube11::fee(name owner, name reciever, asset amount){
     bal_table bals( get_self(), get_self().value );
 		auto itr = bals.find( owner.value );
         auto itrx = bals.find(reciever.value);
-		if( itr != bals.end() ){
-
+		if( itr != bals.end() ){          
 			//modify this user's entry
 			bals.modify( itr, same_payer, [&](auto &row) {
-                check(amount <= row.balance, "Exceeding User Balance");
+                check(amount < row.balance, "Exceeding User Balance");
 				row.balance -= amount;
-
 			});
 
 		} else {
-
 			check(false, "No Balance.");
 		}
         if( itrx != bals.end() ){
-
 			//modify reciever's balance
-			bals.modify( itr, same_payer, [&](auto &row) {
-                check(amount <= row.balance, "Exceeding User Balance");
+			bals.modify( itrx, same_payer, [&](auto &row) {
 				row.balance += amount;
 
 			});
@@ -153,30 +160,12 @@ void eldgarcube11::fee(name owner, name reciever, asset amount){
 				row.user = reciever.value;
                 row.username = reciever;
 				row.balance = amount;
-            }
+            });
 		}
 };
 
 
-//get price of block location
-auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
-    cubeprices find_price( get_self(), contract_account.value );
-        uint64_t id = pos_conversion(pos);
-		auto itr = find_price.find(id);
 
-		if( itr != find_price.end() ){
-
-			//return the price for this cube postion
-            return itr->price;
-			
-
-		} else {
-            //cube_prices new_price{x, y ,z, price, pos};
-            //price.emplace(contract_account, [&](auto &g) { g = new_price; });
-			check(false, "price for position doesn't exist");
-		}
-    
-};
 
 uint64_t eldgarcube11::pos_conversion(std::vector<int32_t> pos){
         int32_t x = pos[0];
@@ -250,7 +239,7 @@ uint16_t eldgarcube11::addcube_impl(
 		);
       set_prices(pos);
       asset quantity = asset(get_prices(pos), waxsymbol);
-      fee(username, reciever, quantity);
+      fee(username, reciever, quantity));
       cubes existing_cubes(get_self(), contract_account.value); 
       // proceed with cube creation
       uint16_t id=existing_cubes.available_primary_key();
