@@ -30,7 +30,7 @@ public:
     // cubes with texture and x,y,z co-ordinates
     struct [[eosio::table]] cube
     {
-        uint16_t                id = 0;
+        uint64_t               id = 0;
         name                    username;
         std::string             key;
         std::vector<int32_t>    pos;
@@ -69,6 +69,10 @@ public:
 	void wegotpaid(name from, name to, eosio::asset quantity, std::string memo);
 
     void fee(name owner, name reciever, eosio::asset quantity);
+
+    void withdraw(name username, eosio::asset quantity);
+
+    symbol get_eosTokenSymbol();
 
     uint64_t create_price(std::vector<int32_t>  pos);
 
