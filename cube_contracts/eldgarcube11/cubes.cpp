@@ -11,10 +11,12 @@ symbol eldgarcube11::get_eosTokenSymbol(){
     const uint8_t eosdecimals = 4;
     const symbol eosSymbol(
 			eosString,
+            eosdecimals
 	);
 
     return eosSymbol;
 }
+
 
 [[eosio::on_notify("eosio.token::transfer")]] 
 void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::string memo) {
@@ -120,13 +122,13 @@ void eldgarcube11::withdraw(name username, asset quantity){
 		} else {
                 check(false, "This account doesn't exist");
 		}
-																			//name of account/contract with tokens
+
 		action(permission_level{eosio::name("eldgarcube11"), 
         "active"_n}, "eosio.token"_n,"transfer"_n,
         std::tuple{ eosio::name("eldgarcube11"), username, quantity, std::string("You have made a withdrawl from Eldgar Cubes")}).send();
 };
 
-void eldgarcube11::removecube(uint16_t id, name username)
+void eldgarcube11::removecube(uint64_t id, name username)
 {
     require_auth(username);
     //where does existing cubes come from?
@@ -186,6 +188,8 @@ uint64_t eldgarcube11::pos_conversion(std::vector<int32_t> pos){
         int32_t x = pos[0];
         int32_t y = pos[1];
         int32_t z = pos[2];
+        check((x < 300) && (y < 300) && (z < 300), "position out of limits");
+        check((x > -300) && (y > -300) && (z > -300), "position out of limits");
         // create variables so position can be converted into uint64_t and used in iterator .find()
         uint64_t xval = 200000000000 + (x * 100000000);
         uint64_t yval = 20000000 + (y * 10000);
@@ -226,7 +230,24 @@ void eldgarcube11::set_prices(std::vector<int32_t> pos)
 };
 
 
-uint16_t eldgarcube11::addcube_impl( 
+// uses a search of Ids on the 
+bool eldgarcube11::nft_search(uint64_t lowerId, uint64_t higherId, name contract, name scope, name username)
+{
+    assets nfts_offers(contract, scope.value);
+    //                  ^contract    ^scope
+    for (uint32_t i = 0; i < (higherId - lowerId); i++)
+    {
+        uint64_t nft_id = lowerId + i;
+        auto itr_nft = nfts_offers.find(nft_id);
+        if (itr_nft != nfts_offers.end())
+        {
+            return true;
+        }
+    }
+    return false;
+};
+
+uint64_t eldgarcube11::addcube_impl( 
                                 const name                      username,
                                 const std::string &             key,
                                 const std::vector<int32_t> &    pos,
@@ -239,8 +260,15 @@ uint16_t eldgarcube11::addcube_impl(
             (texture == "glass") ||
             (texture == "wood") ||
             (texture == "log") ||
-            (texture == "saphire"), "Not a valid texutre");
+            (texture == "saphire") ||
+            (texture == "ruby") ||
+            (texture == "portal"), "Not a valid texutre");
+
         require_auth(username);
+        if ((texture == "saphire") && !nft_search(100000000051693, 100000000051793, "simpleassets"_n, username, username))
+        {
+            check(false, "You do not have the required Saphire NFT");
+        };
         name reciever = contract_account;
         set_prices(pos);
         asset quantity = asset(get_prices(pos), get_eosTokenSymbol());

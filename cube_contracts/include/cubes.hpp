@@ -62,15 +62,29 @@ public:
 
 	};
 
-	using bal_table = eosio::multi_index<"balances"_n, balances
-	>;
+	using bal_table = eosio::multi_index<"balances"_n, balances>;
+
+   struct [[eosio::table]] sassets
+    {
+
+        uint64_t    id;
+        name        owner;
+        name        author;
+        name        category;
+        std::string idata;
+        std::string mdata;
+        std::string container;
+        std::string containerf;
+
+        auto primary_key() const { return id; }
+    };
+
+    using assets = eosio::multi_index<"sassets"_n, sassets>;
 
     [[eosio::on_notify("eosio.token::transfer")]] 
 	void wegotpaid(name from, name to, eosio::asset quantity, std::string memo);
 
     void fee(name owner, name reciever, eosio::asset quantity);
-
-    void withdraw(name username, eosio::asset quantity);
 
     symbol get_eosTokenSymbol();
 
@@ -78,20 +92,25 @@ public:
 
     void set_prices(std::vector<int32_t> pos);
 
+    bool nft_search(uint64_t lowerId, uint64_t higherId, name contract, name scope, name username);
+
     uint64_t pos_conversion(std::vector<int32_t> pos);
 
     auto get_prices(std::vector<int32_t> pos);
 
     [[eosio::action]]
+    void withdraw(name username, eosio::asset quantity);
+
+    [[eosio::action]]
     void addcube(const name username, const std::string &key, const std::vector<int32_t> &pos, const std::string &texture);
 
     [[eosio::action]]
-    void removecube(uint16_t id, name username);
+    void removecube(uint64_t id, name username);
 
 protected:
     
     
-    uint16_t addcube_impl(
+    uint64_t addcube_impl(
                         const name                    username, 
                         const std::string &           key,
                         const std::vector<int32_t> &  pos,
