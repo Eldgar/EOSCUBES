@@ -32,7 +32,7 @@ void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::str
 
 		);
 
-		check( quantity.amount >= 100, "Quanity must be greater than 0.1 EOS" );
+		check( quantity.amount >= 10, "Quanity must be greater than 0.1 EOS" );
 		check( REAL_CONTRACT == ORIGINAL_CONTRACT, "You tryna get over on us, bro?" );
 
 		if( from == get_self() || to != get_self() )
@@ -46,15 +46,11 @@ void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::str
 		auto itr = bals.find( from.value );
 
 		if( itr != bals.end() ){
-
-			//modify this user's entry
-
+			//modify this user's balance
 			bals.modify( itr, same_payer, [&](auto &row) {
 				row.balance += quantity;
 			});
-
 		} else {
-
 			bals.emplace( get_self(), [&](auto &row) {
 
 				row.user = from.value;
@@ -64,11 +60,12 @@ void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::str
 			});
 
 		}
-																			//name of account/contract with tokens
+
+        /* EXAMPLE of a contract reacting to a transaction, not needed now but keeping here for reference
 		action(permission_level{eosio::name("eldgarcube11"), 
         "active"_n}, "eosio.token"_n,"transfer"_n,
         std::tuple{ eosio::name("eldgarcube11"), from, asset(10, waxdaosymbol), std::string("We just reacted son")}).send();
-
+        */
 	}//end of on_notify
 
 void eldgarcube11::addcube(
@@ -106,10 +103,9 @@ auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
 void eldgarcube11::withdraw(name username, asset quantity){
     require_auth(username);
     const eosio::name REAL_CONTRACT = "eosio.token"_n;
-	check( quantity.amount >= 1000, "Quanity must be greater than 0.1 EOS" );
+	check( quantity.amount >= 10, "Quanity must be greater than 0.1 EOS" );
 	check( quantity.symbol == get_eosTokenSymbol(), "Symbol is not what we were expecting" );
 
-	//emplace info into table
 	bal_table bals( get_self(), get_self().value );
 	auto itr = bals.find( username.value );
 
@@ -265,10 +261,16 @@ uint64_t eldgarcube11::addcube_impl(
             (texture == "portal"), "Not a valid texutre");
 
         require_auth(username);
-        if ((texture == "saphire") && !nft_search(100000000051693, 100000000051793, "simpleassets"_n, username, username))
-        {
-            check(false, "You do not have the required Saphire NFT");
-        };
+        //check for NFTs with the range of IDs when created (100 created for each)
+        check(!(texture == "saphire") && !nft_search(100000000051693, 100000000051792, "simpleassets"_n, username, username), 
+            "You do not have the required Saphire NFT");
+
+        check(!(texture == "ruby") && !nft_search(100000000051925, 100000000052024, "simpleassets"_n, username, username),
+             "You do not have the required ruby NFT");
+
+        check(!(texture == "portal") && !nft_search(100000000052025, 100000000052124, "simpleassets"_n, username, username),
+             "You do not have the required portal NFT");
+             
         name reciever = contract_account;
         set_prices(pos);
         asset quantity = asset(get_prices(pos), get_eosTokenSymbol());
