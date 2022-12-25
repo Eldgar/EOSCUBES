@@ -17,13 +17,13 @@ using namespace eosio;
 namespace tte {
 
 // IMPORTANT: Must be the same as the --filter-name parameter's value of rodeos
-static constexpr auto contract_account = "eldgarcube11"_n;
+static constexpr auto contract_account = "eldgarcube12"_n;
 
-class[[eosio::contract("eldgarcube11")]] eldgarcube11 : public contract
+class[[eosio::contract("eldgarcube12")]] eldgarcube12 : public contract
 {
 public:
     using contract::contract;
-    eldgarcube11(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds) {}
+    eldgarcube12(name receiver, name code, datastream<const char *> ds) : contract(receiver, code, ds) {}
 
     
 
@@ -37,7 +37,7 @@ public:
         std::string             texture;
 
         auto primary_key() const { return id; }
-        //EOSLIB_SERIALIZE( cube, (id)(username)(key)(pos)(texture))
+        
     };
     typedef eosio::multi_index<"cubes"_n, cube>     cubes;
 
@@ -49,7 +49,7 @@ public:
         uint32_t                price;
         
         uint16_t primary_key() const { return id; }
-        //EOSLIB_SERIALIZE( cube, (id)(username)(key)(pos)(texture))
+        
     };
     typedef eosio::multi_index<"cubeprices"_n, cubeprice>     cubeprices;
 
@@ -64,35 +64,32 @@ public:
 
 	using bal_table = eosio::multi_index<"balances"_n, balances>;
 
-   struct [[eosio::table]] sassets
-    {
+    struct [[eosio::table]] assets {
+		uint64_t asset_id;
+		name collection_name;
+		name schema_name;
+		int32_t template_id;
+		name ram_payer;
+		std::vector<asset> backed_tokens;
+		std::vector<uint8_t> immutable_serialized_data;
+		std::vector<uint8_t> mutable_serialized_data;
+		uint64_t primary_key() const { return asset_id; }
+	};
 
-        uint64_t    id;
-        name        owner;
-        name        author;
-        name        category;
-        std::string idata;
-        std::string mdata;
-        std::string container;
-        std::string containerf;
-
-        auto primary_key() const { return id; }
-    };
-
-    using assets = eosio::multi_index<"sassets"_n, sassets>;
-
+	using atomic_assets = eosio::multi_index<"assets"_n, assets>;
+    //eosio::indexed_by<"templateid"_n, eosio::const_mem_fun<assets, uint64_t, &assets::second_key>>>;
     [[eosio::on_notify("eosio.token::transfer")]] 
 	void wegotpaid(name from, name to, eosio::asset quantity, std::string memo);
 
     void fee(name owner, name reciever, eosio::asset quantity);
 
-    symbol get_eosTokenSymbol();
+    symbol get_tokenSymbol();
 
     uint64_t create_price(std::vector<int32_t>  pos);
 
     void set_prices(std::vector<int32_t> pos);
 
-    bool nft_search(uint64_t lowerId, uint64_t higherId, name contract, name scope, name username);
+    bool nft_search(int32_t template_id,  name contract, name scope);
 
     uint64_t pos_conversion(std::vector<int32_t> pos);
 

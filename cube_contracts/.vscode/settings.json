@@ -75,6 +75,7 @@
         "ios": "cpp",
         "locale": "cpp",
         "queue": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "__memory": "cpp"
     }
 }

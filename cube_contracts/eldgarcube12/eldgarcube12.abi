@@ -26,6 +26,44 @@
             ]
         },
         {
+            "name": "assets",
+            "base": "",
+            "fields": [
+                {
+                    "name": "asset_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "collection_name",
+                    "type": "name"
+                },
+                {
+                    "name": "schema_name",
+                    "type": "name"
+                },
+                {
+                    "name": "template_id",
+                    "type": "int32"
+                },
+                {
+                    "name": "ram_payer",
+                    "type": "name"
+                },
+                {
+                    "name": "backed_tokens",
+                    "type": "asset[]"
+                },
+                {
+                    "name": "immutable_serialized_data",
+                    "type": "bytes"
+                },
+                {
+                    "name": "mutable_serialized_data",
+                    "type": "bytes"
+                }
+            ]
+        },
+        {
             "name": "balances",
             "base": "",
             "fields": [
@@ -98,44 +136,6 @@
             ]
         },
         {
-            "name": "sassets",
-            "base": "",
-            "fields": [
-                {
-                    "name": "id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "owner",
-                    "type": "name"
-                },
-                {
-                    "name": "author",
-                    "type": "name"
-                },
-                {
-                    "name": "category",
-                    "type": "name"
-                },
-                {
-                    "name": "idata",
-                    "type": "string"
-                },
-                {
-                    "name": "mdata",
-                    "type": "string"
-                },
-                {
-                    "name": "container",
-                    "type": "string"
-                },
-                {
-                    "name": "containerf",
-                    "type": "string"
-                }
-            ]
-        },
-        {
             "name": "withdraw",
             "base": "",
             "fields": [
@@ -169,6 +169,13 @@
     ],
     "tables": [
         {
+            "name": "assets",
+            "type": "assets",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
             "name": "balances",
             "type": "balances",
             "index_type": "i64",
@@ -185,13 +192,6 @@
         {
             "name": "cubes",
             "type": "cube",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "sassets",
-            "type": "sassets",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

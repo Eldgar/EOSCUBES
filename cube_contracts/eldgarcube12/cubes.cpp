@@ -6,25 +6,25 @@
 using namespace eosio;
 
 namespace tte {
-symbol eldgarcube11::get_eosTokenSymbol(){
-    const std::string_view eosString{"EOS"};
-    const uint8_t eosdecimals = 4;
-    const symbol eosSymbol(
-			eosString,
-            eosdecimals
+symbol eldgarcube12::get_tokenSymbol(){
+    const std::string_view string{"WAX"};
+    const uint8_t decimals = 8;
+    const symbol symbol(
+			string,
+            decimals
 	);
 
-    return eosSymbol;
+    return symbol;
 }
 
 
 [[eosio::on_notify("eosio.token::transfer")]] 
-void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::string memo) {
+void eldgarcube12::wegotpaid(name from, name to, eosio::asset quantity, std::string memo) {
         const eosio::name REAL_CONTRACT = "eosio.token"_n;
 		const eosio::name ORIGINAL_CONTRACT = get_first_receiver();
 
-		const std::string_view waxdaoString{"EOS"};
-		const uint8_t waxdaodecimals = 4;
+		const std::string_view waxdaoString{"WAX"};
+		const uint8_t waxdaodecimals = 8;
 		const symbol waxdaosymbol(
 
 			waxdaoString,
@@ -32,14 +32,14 @@ void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::str
 
 		);
 
-		check( quantity.amount >= 10, "Quanity must be greater than 0.1 EOS" );
+		check( quantity.amount >= 10, "Quanity must be greater than 0.1 WAX" );
 		check( REAL_CONTRACT == ORIGINAL_CONTRACT, "You tryna get over on us, bro?" );
 
 		if( from == get_self() || to != get_self() )
         { return; }
 
 
-		check( quantity.symbol == get_eosTokenSymbol(), "Symbol is not what we were expecting" );
+		check( quantity.symbol == get_tokenSymbol(), "Symbol is not what we were expecting" );
 
 		//emplace info into table
 		bal_table bals( get_self(), get_self().value );
@@ -68,7 +68,7 @@ void eldgarcube11::wegotpaid(name from, name to, eosio::asset quantity, std::str
         */
 	}//end of on_notify
 
-void eldgarcube11::addcube(
+void eldgarcube12::addcube(
         const name                      username, 
         const std::string &             key,
         const std::vector<int32_t> &    pos,
@@ -79,7 +79,7 @@ void eldgarcube11::addcube(
 }
 
 //get price of block location
-auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
+auto eldgarcube12::get_prices(std::vector<int32_t>  pos) {
     cubeprices find_price( get_self(), contract_account.value );
         uint64_t id = pos_conversion(pos);
 		auto itr = find_price.find(id);
@@ -100,11 +100,11 @@ auto eldgarcube11::get_prices(std::vector<int32_t>  pos) {
 
 
 //Allow users to withdraw their balance
-void eldgarcube11::withdraw(name username, asset quantity){
+void eldgarcube12::withdraw(name username, asset quantity){
     require_auth(username);
     const eosio::name REAL_CONTRACT = "eosio.token"_n;
 	check( quantity.amount >= 10, "Quanity must be greater than 0.1 EOS" );
-	check( quantity.symbol == get_eosTokenSymbol(), "Symbol is not what we were expecting" );
+	check( quantity.symbol == get_tokenSymbol(), "Symbol is not what we were expecting" );
 
 	bal_table bals( get_self(), get_self().value );
 	auto itr = bals.find( username.value );
@@ -119,12 +119,12 @@ void eldgarcube11::withdraw(name username, asset quantity){
                 check(false, "This account doesn't exist");
 		}
 
-		action(permission_level{eosio::name("eldgarcube11"), 
+		action(permission_level{eosio::name("eldgarcube12"), 
         "active"_n}, "eosio.token"_n,"transfer"_n,
-        std::tuple{ eosio::name("eldgarcube11"), username, quantity, std::string("You have made a withdrawl from Eldgar Cubes")}).send();
+        std::tuple{ eosio::name("eldgarcube12"), username, quantity, std::string("You have made a withdrawl from Eldgar Cubes")}).send();
 };
 
-void eldgarcube11::removecube(uint64_t id, name username)
+void eldgarcube12::removecube(uint64_t id, name username)
 {
     require_auth(username);
     //where does existing cubes come from?
@@ -134,7 +134,7 @@ void eldgarcube11::removecube(uint64_t id, name username)
     auto itr = existing_cubes.find(id);
     auto pos = itr->pos;
     auto cube_owner = itr->username;
-    asset quantity = asset(get_prices(pos), get_eosTokenSymbol());
+    asset quantity = asset(get_prices(pos), get_tokenSymbol());
     fee(username, cube_owner, quantity);
     check(itr != existing_cubes.end(), "Unable to find an order with specified ID");
 
@@ -144,7 +144,7 @@ void eldgarcube11::removecube(uint64_t id, name username)
 
 
 // fee to be paid for adding a block
-void eldgarcube11::fee(name owner, name reciever, eosio::asset amount){
+void eldgarcube12::fee(name owner, name reciever, eosio::asset amount){
     //get balances table
     bal_table bals( get_self(), get_self().value );
 		auto itr = bals.find( owner.value );
@@ -180,7 +180,7 @@ void eldgarcube11::fee(name owner, name reciever, eosio::asset amount){
 
 
 
-uint64_t eldgarcube11::pos_conversion(std::vector<int32_t> pos){
+uint64_t eldgarcube12::pos_conversion(std::vector<int32_t> pos){
         int32_t x = pos[0];
         int32_t y = pos[1];
         int32_t z = pos[2];
@@ -197,7 +197,7 @@ uint64_t eldgarcube11::pos_conversion(std::vector<int32_t> pos){
 }
 
 
-uint64_t eldgarcube11::create_price(std::vector<int32_t> pos){
+uint64_t eldgarcube12::create_price(std::vector<int32_t> pos){
         cubeprices set_price(get_self(), contract_account.value );
 
         uint64_t id = pos_conversion(pos);
@@ -207,7 +207,7 @@ uint64_t eldgarcube11::create_price(std::vector<int32_t> pos){
         return id;
 }
 
-void eldgarcube11::set_prices(std::vector<int32_t> pos)
+void eldgarcube12::set_prices(std::vector<int32_t> pos)
 {
     cubeprices set_price(get_self(), contract_account.value );
         uint64_t id = pos_conversion(pos);
@@ -227,23 +227,39 @@ void eldgarcube11::set_prices(std::vector<int32_t> pos)
 
 
 // uses a search of Ids on the 
-bool eldgarcube11::nft_search(uint64_t lowerId, uint64_t higherId, name contract, name scope, name username)
+bool eldgarcube12::nft_search(int32_t template_id, name contract, name scope)
 {
-    assets nfts_offers(contract, scope.value);
-    //                  ^contract    ^scope
-    for (uint32_t i = 0; i < (higherId - lowerId); i++)
-    {
-        uint64_t nft_id = lowerId + i;
-        auto itr_nft = nfts_offers.find(nft_id);
-        if (itr_nft != nfts_offers.end())
-        {
+    atomic_assets nfts_offers(contract, scope.value);
+    //auto template_secondary = nfts_offers.get_index<"templateid"_n>();
+	//auto nft_amount = template_secondary.size(template_id);
+
+    auto itr = nfts_offers.begin();
+
+    //auto nft_low_itr = template_secondary.lower_bound(template_id.value);
+	//auto nft_up_itr = template_secondary.upper_bound(template_id.value);
+
+		uint16_t foundCount = 0;
+
+		for( auto found_itr = itr; found_itr != nfts_offers.end(); found_itr++ ){
+			if((found_itr -> template_id) == template_id){
+                foundCount ++;
+            }
+            
+            
+		}
+
+        if(foundCount > 0){
+            check(false, "NFT found");
             return true;
         }
-    }
+
+    check(false, "NFT not found");
+
     return false;
+
 };
 
-uint64_t eldgarcube11::addcube_impl( 
+uint64_t eldgarcube12::addcube_impl( 
                                 const name                      username,
                                 const std::string &             key,
                                 const std::vector<int32_t> &    pos,
@@ -262,18 +278,21 @@ uint64_t eldgarcube11::addcube_impl(
 
         require_auth(username);
         //check for NFTs with the range of IDs when created (100 created for each)
-        check(!(texture == "saphire") && !nft_search(100000000051693, 100000000051792, "simpleassets"_n, username, username), 
-            "You do not have the required Saphire NFT");
+        if ((texture == "saphire") && !nft_search(604079, "atomicassets"_n, username)){
+            check(false, "You do not have the required saphire NFT");
+        };
 
-        check(!(texture == "ruby") && !nft_search(100000000051925, 100000000052024, "simpleassets"_n, username, username),
-             "You do not have the required ruby NFT");
+        if ((texture == "ruby") && !nft_search(604080, "atomicassets"_n, username)){
+            check(false, "You do not have the required ruby NFT");
+        };
 
-        check(!(texture == "portal") && !nft_search(100000000052025, 100000000052124, "simpleassets"_n, username, username),
-             "You do not have the required portal NFT");
+        if ((texture == "portal") && !nft_search(604081, "atomicassets"_n, username)){
+            check(false, "You do not have the required ruby NFT");
+        };
              
         name reciever = contract_account;
         set_prices(pos);
-        asset quantity = asset(get_prices(pos), get_eosTokenSymbol());
+        asset quantity = asset(get_prices(pos), get_tokenSymbol());
         fee(username, reciever, quantity);
         cubes existing_cubes(get_self(), contract_account.value); 
         // proceed with cube creation
